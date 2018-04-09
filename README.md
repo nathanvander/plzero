@@ -6,7 +6,7 @@ The name "plzero" comes from the simplest possible programming language, PL/0.  
 This is intended to be fully functional with these limitations:
 - does not handle longs or doubles
 - does use or respect access flags, other than "static"
-- does not use or handle Exceptions
+- does not use or handle Exceptions (or try, throw, or catch)
 - does not enforce restrictions on types, specifically with fields or arrays. This will not be an issue with well-formed class files.
 - limited to 5 local variables
 
