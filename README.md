@@ -13,4 +13,6 @@ This is intended to be fully functional with these limitations:
 Know bugs:
 - can only handle 1 argument when passing arguments to "native" Java methods.  It is suprisingly difficult to find the number of parameters, the types, and to convert from the plzero generic type to the specific Java class.  But I plan on making this work.
 
-It handles recursion, see test code.
+It handles recursion, see test code.  This needs much more testing.
+
+This depends on the BCEL code, available at: https://commons.apache.org/proper/commons-bcel/download_bcel.cgi
