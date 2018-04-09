@@ -1,5 +1,6 @@
 package plzero;
 import java.util.Arrays;
+import java.util.Vector;
 
 /**
 * BString contains utility methods to help byte[] arrays act as strings.
@@ -61,17 +62,64 @@ public class BString {
 		return c.replaceAll(FRONT,DOT);
 	}
 
-	//despite the fancy name, this can only decipher 1 param type.
 	//this is meant for matching a java method
-	public static Class[] getMethodParameterTypes(byte[] methodType) {
+	//we expect the format to look something like (IILjava/lang/String;)V
+	public static Class[] getMethodParameterTypes(byte[] methodType) throws ClassNotFoundException {
 		String methodTypeString=new String(methodType);
-		if (methodTypeString.startsWith("(Ljava/lang/String;")) {
-			return new Class[]{String.class};
-		} else if (methodTypeString.startsWith("(I")) {
-			return new Class[]{Integer.TYPE};
+		Vector v=new Vector();	//temporary list
+		//start with 1 because 0 is (
+		int st=1;
+		Class k=nextToken(methodTypeString,st);
+
+		while (k!=null) {
+			//System.out.println("adding token type "+k.toString());
+			v.add(k);
+			if (k.isPrimitive()) {
+				st++;
+			} else {
+				st=st+k.getName().length()+2;
+			}
+			k=nextToken(methodTypeString,st);
+		}
+
+		Class[] params=new Class[v.size()];
+		for (int i=0;i<params.length;i++) {
+			params[i]=(Class)v.elementAt(i);
+		}
+		return params;
+	}
+
+	//we only handle String,int,float,boolean
+	public static Class nextToken(String paramType, int start) throws ClassNotFoundException {
+		//System.out.println("looking for token starting with "+start);
+		if (start+1>paramType.length()) return null;
+		char ch=paramType.charAt(start);
+		if (ch==')') return null;	//no more
+
+		if (ch=='I') {
+			return Integer.TYPE;
+		} else if (ch=='F') {
+			return Float.TYPE;
+		} else if (ch=='Z') {
+			return Boolean.TYPE;
+		} else if (ch=='L') {
+			int end=paramType.indexOf((int)';',start);
+			String className=paramType.substring(start+1,end);
+			className=className.replaceAll(FRONT,DOT);
+			Class c=Class.forName(className);
+			return c;
 		} else {
-			System.out.println("unable to decipher methodType "+methodTypeString);
+			System.out.println("DEBUG: BString.nextToken unhandled class type "+ch);
 			return null;
+		}
+	}
+
+	public static void main(String[] args) throws ClassNotFoundException {
+		System.out.println("testing getMethodParameterTypes().  Input should look like: (Ljava/lang/String;I)V");
+		Class[] p=getMethodParameterTypes(args[0].getBytes())	;
+		for (int i=0;i<p.length;i++) {
+			Class k=p[i];
+			System.out.println("param "+i+" "+k.getName());
 		}
 	}
 }

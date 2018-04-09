@@ -82,7 +82,7 @@ public class ZThread {
 		if (!ctx.isStatic && ctx.vobj==null) {throw new IllegalArgumentException("ctx.vobj is null");}
 		//System.out.println("DEBUG: ZThread.javaInvoke method.name="+ctx.jmethod.getName());
 		Class[] types=ctx.jmethod.getParameterTypes();
-		Class type0=types[0];
+		//Class type0=types[0];
 		//System.out.println("DEBUg: ZThread.javaInvoke method.type="+type0.getName());
 		try {
 			//get the base object
@@ -99,30 +99,30 @@ public class ZThread {
 
 			//now get the parameters
 			//we only handle int,String and Object
-			//at this point we only handle 1 param
+			//convert params to jparams
 			Variable[] params=ctx.params;
-			Object jparam1=null;
-			//System.out.println("DEBUG: ZThread.javaInvoke() params.length="+params.length);
-			if (params!=null && params.length>0) {
-				Variable vp=params[0];
-				//System.out.println("DEBUG: ZThread.javaInvoke() vp.tag()="+vp.tag());
+			Object[] jparams=new Object[params.length];
+			for (int i=0;i<params.length;i++) {
+				Variable vp=params[i];
 				if (vp.tag()==Variable.INT) {
-					int i2=vp.getInt();
-					jparam1=Integer.valueOf(i2);
+					jparams[i]=Integer.valueOf(vp.getInt());
+				} else if (vp.tag()==Variable.FLOAT) {
+					jparams[i]=Float.valueOf(vp.getFloat());
 				} else if (vp.tag()==Variable.UTF8) {
-					jparam1=vp.toString();
+					jparams[i]=vp.toString();
 				} else if (vp.tag()==Variable.JAVA_OBJECT) {
 					Object o=Heap.get(vp.getInt());
-					jparam1=o;
+					jparams[i]=o;
 				} else {
 					throw new IllegalStateException("unable to set params because type is "+vp.tag());
 				}
 			}
+
 			//System.out.println("DEBUG: ZThread.javaInvoke() base.type="+base.getClass().getName());
 			//System.out.println("DEBUG: ZThread.javaInvoke() jparam1.type="+jparam1.getClass().getName());
 			//finally we can run it
 			//we only handle 1 param
-			return ctx.jmethod.invoke(base,jparam1);
+			return ctx.jmethod.invoke(base,jparams);
 		} catch (Exception x) {
 			x.printStackTrace();
 		}
